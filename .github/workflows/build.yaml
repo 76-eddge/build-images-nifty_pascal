@@ -16,20 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         tag:
-        - cxx-Alpine
-        - cxx-CentOS6 # CentOS 6 is EOL, so this image does not need to be rebuilt each time
-        - cxx-Trusty
-        - cxx-Xenial
         - nifty_pascal-linux
-        - cxx-extras-Alpine
-        - cxx-extras-Jammy
-        - packaging-utils-Alpine
-        - python-latex-Alpine
-        - java-runtime-Alpine
-        - java-runtime-rhel7
-        - java-psycopg2-rhel7
-        - buildtools-rhel7
-        - node-custom
 
     steps:
     - uses: actions/checkout@v3
