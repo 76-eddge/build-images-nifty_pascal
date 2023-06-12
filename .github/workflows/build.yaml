@@ -32,13 +32,12 @@ jobs:
         tags: 76eddge/build-images:${{ matrix.tag }}
         target: deploy
 
-    - name: Login to DockerHub
-      if: github.event_name == 'release'
-      run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-
     - name: Push Docker Images
-      if: github.event_name == 'release'
-      run: docker push -a 76eddge/build-images
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
+        GIT_TAG=2
+        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-test
+        docker push "76eddge/build-images:${{ matrix.tag }}-test"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
@@ -69,13 +68,11 @@ jobs:
         cp nifty_pascal-linux/build.gradle nifty_pascal-windows/
         docker build nifty_pascal-windows --tag 76eddge/build-images:nifty_pascal-windows
 
-    - name: Login to DockerHub
-      if: github.event_name == 'release'
-      run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-
     - name: Push Docker Images
-      if: github.event_name == 'release'
-      run: docker push -a 76eddge/build-images
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
+        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-test"
+        docker push "76eddge/build-images:nifty_pascal-windows-test"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
