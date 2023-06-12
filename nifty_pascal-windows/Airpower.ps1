@@ -10,7 +10,7 @@ $script:AirpowerPackages =
 	'nasm',
 	'ninja',
 	'node',
-	'perl',
 	'python',
-	"vs-buildtools",
-	'git'
+	"vs-buildtools:17.4",
+	'git',
+	'perl'
