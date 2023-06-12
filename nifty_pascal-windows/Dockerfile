@@ -16,4 +16,4 @@ RUN $ProgressPreference = 'SilentlyContinue'; \
 	rm -r -fo Airpower.ps1, *.gradle
 
 # Create make.exe -> gmake.exe link
-RUN Get-ChildItem -Path \\?\$env:LocalAppData\Airpower\content -Recurse -Include 'gmake.exe' | Select-Object -First 1 | ForEach-Object { New-Item -ItemType HardLink \"$($_.DirectoryName)\make.exe\" -Target $_ }
+RUN Get-ChildItem -Path \\?\$env:LocalAppData\Airpower\content -Recurse -Include 'gmake.exe' | Select-Object -First 1 | ForEach-Object { if (-not (Test-Path \"$($_.DirectoryName)\make.exe\")) { New-Item -ItemType HardLink \"$($_.DirectoryName)\make.exe\" -Target $_ } }
