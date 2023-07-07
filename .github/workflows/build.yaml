@@ -81,7 +81,7 @@ jobs:
       if: github.event_name != 'release'
       run: |
         choco install grype
-        grype -o sarif '76eddge/build-images:nifty_pascal-windows' | Out-File nifty_pascal-windows.sarif utf8
+        grype --platform 'windows/amd64' -o sarif '76eddge/build-images:nifty_pascal-windows' | Out-File nifty_pascal-windows.sarif utf8
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
