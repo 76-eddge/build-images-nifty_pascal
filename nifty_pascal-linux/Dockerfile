@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs linux-headers make msttcorefonts-installer nodejs patch perl py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs libtool linux-headers make msttcorefonts-installer nodejs patch perl py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
 # Install npm, gradle, JDK from latest-stable for security fixes
@@ -10,7 +10,7 @@ RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/co
 # Install Powershell and its dependencies (see https://learn.microsoft.com/en-us/powershell/scripting/install/install-alpine)
 RUN apk add --no-cache ca-certificates less ncurses-terminfo-base krb5-libs libgcc libintl libssl1.1 libstdc++ tzdata userspace-rcu zlib icu-libs curl lttng-ust && \
 	mkdir -p /opt/microsoft/powershell/7 && \
-	curl -sL https://github.com/PowerShell/PowerShell/releases/download/v7.3.0/powershell-7.3.0-linux-alpine-x64.tar.gz | tar zx -C /opt/microsoft/powershell/7 && \
+	curl -sL https://github.com/PowerShell/PowerShell/releases/download/v7.3.9/powershell-7.3.9-linux-alpine-x64.tar.gz | tar zx -C /opt/microsoft/powershell/7 && \
 	chmod +x /opt/microsoft/powershell/7/pwsh && \
 	ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
