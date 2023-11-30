@@ -32,13 +32,21 @@ jobs:
         tags: 76eddge/build-images:${{ matrix.tag }}
         target: deploy
 
-    - name: Push Docker Images
+    - name: Push Release Docker Image
       if: github.event_name == 'release'
       run: |
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
         GIT_TAG=${{ github.event.release.tag_name }}
         docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${GIT_TAG#v}
         docker push -a 76eddge/build-images
+
+    - name: Push Test Docker Image
+      if: github.event_name != 'release'
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
+        GIT_TAG=2
+        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${{ github.ref_name }}
+        docker push "76eddge/build-images:${{ matrix.tag }}-${{ github.ref_name }}"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
@@ -69,13 +77,21 @@ jobs:
         cp nifty_pascal-linux/build.gradle nifty_pascal-windows/
         docker build nifty_pascal-windows --tag 76eddge/build-images:nifty_pascal-windows
 
-    - name: Push Docker Images
+    - name: Push Release Docker Image
       if: github.event_name == 'release'
       run: |
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
         docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-$('${{ github.event.release.tag_name }}' -replace '^v', '')"
         docker push -a 76eddge/build-images
 
+    - name: Push Test Docker Image
+      if: github.event_name != 'release'
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
+        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-${{ github.ref_name }}"
+        docker push "76eddge/build-images:nifty_pascal-windows-${{ github.ref_name }}"
+
+    # Note: grype scanning no longer supports `--platform 'windows/amd64'`
     - name: Run Grype Scan
       if: github.event_name != 'release'
       run: |
