@@ -26,13 +26,13 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         cache-from: type=gha,scope=${{ matrix.tag }}
-        cache-to: type=gha,mode=max,scope=${{ matrix.tag }}
+        cache-to: type=gha,ignore-error=true,mode=max,scope=${{ matrix.tag }}
         context: ${{ matrix.tag }}
         outputs: type=docker
         tags: 76eddge/build-images:${{ matrix.tag }}
         target: deploy
 
-    - name: Push Docker Images
+    - name: Push Release Docker Image
       if: github.event_name == 'release'
       run: |
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
@@ -69,7 +69,7 @@ jobs:
         cp nifty_pascal-linux/build.gradle nifty_pascal-windows/
         docker build nifty_pascal-windows --tag 76eddge/build-images:nifty_pascal-windows
 
-    - name: Push Docker Images
+    - name: Push Release Docker Image
       if: github.event_name == 'release'
       run: |
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
