@@ -20,6 +20,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: jlumbroso/free-disk-space@main
     - uses: docker/setup-buildx-action@v2
 
     - name: Build Docker Image
@@ -42,13 +43,11 @@ jobs:
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/bin
-        grype -o sarif '76eddge/build-images:${{ matrix.tag }}' > ${{ matrix.tag }}.sarif
+      run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock anchore/grype -o sarif docker:76eddge/build-images:${{ matrix.tag }} > ${{ matrix.tag }}.sarif
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: ${{ matrix.tag }}.sarif
         category: ${{ matrix.tag }}
@@ -84,7 +83,7 @@ jobs:
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: nifty_pascal-windows.sarif
         category: nifty_pascal-windows
