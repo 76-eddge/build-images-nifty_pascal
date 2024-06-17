@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs libtool linux-headers make msttcorefonts-installer nodejs patch perl py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs libtool linux-headers make msttcorefonts-installer nodejs patch perl py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed sudo util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
 # Install npm, JDK, gradle from latest-stable for security fixes
@@ -22,12 +22,16 @@ RUN apk add --no-cache erlang
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
 	mkdir -p "/opt/$Arch" && \
-	curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.38/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
+	curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.42/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
 
 # Perform tasks as basic user
-RUN adduser --disabled-password jenkins
+RUN adduser --disabled-password jenkins && \
+	mkdir -p /etc/sudoers.d && \
+	echo "jenkins ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/jenkins && \
+	chmod 0440 /etc/sudoers.d/jenkins
+
 USER jenkins
 WORKDIR /home/jenkins
 
