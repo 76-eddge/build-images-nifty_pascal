@@ -41,6 +41,13 @@ jobs:
         docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${GIT_TAG#v}
         docker push -a 76eddge/build-images
 
+    - name: Push Test Docker Image
+      if: github.event_name != 'release' && startsWith(github.ref_name, 'test')
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
+        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${{ github.ref_name }}
+        docker push "76eddge/build-images:${{ matrix.tag }}-${{ github.ref_name }}"
+
     - name: Run Grype Scan
       if: github.event_name != 'release'
       run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock anchore/grype -o sarif docker:76eddge/build-images:${{ matrix.tag }} > ${{ matrix.tag }}.sarif
@@ -74,6 +81,13 @@ jobs:
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
         docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-$('${{ github.event.release.tag_name }}' -replace '^v', '')"
         docker push -a 76eddge/build-images
+
+    - name: Push Test Docker Image
+      if: github.event_name != 'release' && startsWith(github.ref_name, 'test')
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
+        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-${{ github.ref_name }}"
+        docker push "76eddge/build-images:nifty_pascal-windows-${{ github.ref_name }}"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'

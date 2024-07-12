@@ -11,6 +11,6 @@ $script:AirpowerPackages =
 	'ninja',
 	'node',
 	'python',
-	"vs-buildtools:17.4",
+	"vs-buildtools:17.8",
 	'git',
 	'perl'
