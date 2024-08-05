@@ -1,4 +1,5 @@
 $script:AirpowerPackages =
+	'chromium',
 	'cmake-converter',
 	'cmake',
 	'doxygen',
