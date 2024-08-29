@@ -21,8 +21,21 @@ RUN apk add --no-cache erlang
 
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
-	mkdir -p "/opt/$Arch" && \
-	curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.44/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
+		mkdir -p "/opt/$Arch" && \
+		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.46/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
+		cp -l "/opt/$Arch/$Arch/lib/libc.a" "/opt/$Arch/$Arch/lib/libssp_nonshared.a"; \
+		find "/opt/$Arch" -name '*.o' | xargs -i cp -l '{}' "/opt/$Arch/lib/"; \
+		echo "--target=$Arch --gcc-toolchain=/opt/$Arch --sysroot=/opt/$Arch -fuse-ld=lld -static-libgcc" > "/opt/$Arch/clang.cfg"; \
+		echo | "/opt/$Arch/bin/$Arch-gcc" -xc++ -E -v - 2>&1 | grep "^ .*/$Arch/include" | sed 's/^/-isystem /' >> "/opt/$Arch/clang.cfg"; \
+		find "/opt/$Arch" -name '*.a' -o -name '*.so*' | grep -v plugin | sed -re 's#/[^/]+$##' | uniq | sed 's/^/-L /' >> "/opt/$Arch/clang.cfg"; \
+		printf "#!/bin/sh\nexec clang --config=/opt/$Arch/clang.cfg \"\$@\"" > "/opt/$Arch/bin/$Arch-clang"; \
+		printf "#!/bin/sh\nexec clang++ --config=/opt/$Arch/clang.cfg \"\$@\"" > "/opt/$Arch/bin/$Arch-clang++"; \
+		chmod +x "/opt/$Arch/bin/$Arch-clang"*; \
+		ln -s /usr/bin/llvm-ar "/opt/$Arch/bin/$Arch-llvm-ar"; \
+		ln -s /usr/bin/llvm-ld "/opt/$Arch/bin/$Arch-llvm-ld"; \
+		ln -s /usr/bin/llvm-nm "/opt/$Arch/bin/$Arch-llvm-nm"; \
+		ln -s /usr/bin/llvm-objdump "/opt/$Arch/bin/$Arch-llvm-objdump"; \
+		ln -s /usr/bin/llvm-ranlib "/opt/$Arch/bin/$Arch-llvm-ranlib"; \
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
 
