@@ -23,7 +23,9 @@ RUN apk add --no-cache erlang
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
 		mkdir -p "/opt/$Arch" && \
 		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.46/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
-		cp -l "/opt/$Arch/$Arch/lib/libc.a" "/opt/$Arch/$Arch/lib/libssp_nonshared.a"; \
+		echo 'extern void __stack_chk_fail(void); void __attribute__((__weak__, __visibility__("hidden"))) __stack_chk_fail_local(void) { __stack_chk_fail(); }' | "/opt/$Arch/bin/$Arch-gcc" -xc - -O3 -nostdlib -fPIC -c -o libssp_nonshared.o; \
+			"/opt/$Arch/bin/$Arch-gcc-ar" rc "/opt/$Arch/$Arch/lib/libssp_nonshared.a" libssp_nonshared.o; \
+			rm -rf libssp_nonshared.o; \
 		find "/opt/$Arch" -name '*.o' | xargs -i cp -l '{}' "/opt/$Arch/lib/"; \
 		echo "--target=$Arch --gcc-toolchain=/opt/$Arch --sysroot=/opt/$Arch -fuse-ld=lld -static-libgcc" > "/opt/$Arch/clang.cfg"; \
 		echo | "/opt/$Arch/bin/$Arch-gcc" -xc++ -E -v - 2>&1 | grep "^ .*/$Arch/include" | sed 's/^/-isystem /' >> "/opt/$Arch/clang.cfg"; \
