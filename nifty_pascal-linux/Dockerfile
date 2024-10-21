@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs libtool linux-headers make msttcorefonts-installer nodejs openssl patch perl py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
 # Install npm, JDK, gradle from latest-stable for security fixes
@@ -18,6 +18,9 @@ RUN apk add --no-cache ca-certificates less ncurses-terminfo-base krb5-libs libg
 
 # Install erlang
 RUN apk add --no-cache erlang
+
+# Install older MS TrueType fonts
+RUN update-ms-fonts && fc-cache -f
 
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
@@ -41,17 +44,20 @@ RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc6
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
 
+# Configure podman
+RUN echo jenkins:10000:5000 >/etc/subuid && \
+	echo jenkins:10000:5000 >/etc/subgid
+
 # Perform tasks as basic user
 RUN adduser --disabled-password jenkins
 USER jenkins
 WORKDIR /home/jenkins
 
-# Install fonts for user
-RUN mkdir -p ~/.fonts && \
-	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/02f6e1e9290581e7fc9bf3beefc0ebc9ec8c1611.zip | unzip -d ~/.fonts -j - '*/font/*' && \
-	curl -s -L -o ~/.fonts/seguisym.ttf https://github.com/microsoft/elfie-arriba/raw/6889a336985caf20ac596a7ff681362423ef5052/Arriba/Arriba.Web/fonts/SEGUISYM.TTF && \
-	curl -s -L http://plasmasturm.org/dl/vistafonts-installer | sed -e 's/{,b,i,z}/*/g' | sh && \
-	rm -f *.exe
+# Install MS ClearType fonts for user
+RUN mkdir -p ~/.local/share/fonts && \
+	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/a89213b7136da6dd5c3638db1f2c6e814c40fa84.zip | unzip -d ~/.local/share/fonts -j - '*/font/*' && \
+	curl -s -L -o PowerPointViewer.exe https://archive.org/download/PowerPointViewer_201801/PowerPointViewer.exe && cabextract PowerPointViewer.exe -F ppviewer.cab && cabextract ppviewer.cab -F '*.TTC' -d ~/.local/share/fonts/ && cabextract ppviewer.cab -F '*.TTF' -d ~/.local/share/fonts/ && rm -rf *.exe *.cab && \
+	fc-cache -fv ~/.local/share/fonts
 
 # Initialize npm
 COPY --chown=jenkins package.json ./npm-init/
