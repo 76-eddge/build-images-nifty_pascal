@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs libtool linux-headers make msttcorefonts-installer nodejs openssl patch perl py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
 # Install npm, JDK, gradle from latest-stable for security fixes
@@ -40,6 +40,12 @@ RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc6
 		ln -s /usr/bin/llvm-ranlib "/opt/$Arch/bin/$Arch-llvm-ranlib"; \
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
+
+# Install zarf
+RUN ZARF_VERSION=$(curl -sIX HEAD https://github.com/zarf-dev/zarf/releases/latest | grep -i ^location: | grep -Eo 'v[0-9]+.[0-9]+.[0-9]+') && \
+	curl -sL "https://github.com/zarf-dev/zarf/releases/download/${ZARF_VERSION}/zarf_${ZARF_VERSION}_Linux_amd64" -o zarf && \
+	chmod +x zarf && \
+	mv zarf /usr/bin/zarf
 
 # Perform tasks as basic user
 RUN adduser --disabled-password jenkins
