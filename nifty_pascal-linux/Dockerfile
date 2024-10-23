@@ -5,7 +5,7 @@ RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer cla
 	ln -sf python3 /usr/bin/python
 
 # Install npm, JDK, gradle from latest-stable for security fixes
-RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk && \
+RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk21-jdk && \
 	curl -sL $(curl -sL https://gradle.org/releases/ | sed -nre 's/.*"([^"]+-bin\.zip)".*/\1/p' | head -n1) | unzip -d /opt -q - && \
 	chmod +x /opt/gradle-*/bin/gradle && ln -s /opt/gradle-*/bin/gradle /usr/bin/gradle
 
@@ -44,6 +44,12 @@ RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc6
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
 
+# Install zarf
+RUN ZARF_VERSION=$(curl -sIX HEAD https://github.com/zarf-dev/zarf/releases/latest | grep -i ^location: | grep -Eo 'v[0-9]+.[0-9]+.[0-9]+') && \
+	curl -sL "https://github.com/zarf-dev/zarf/releases/download/${ZARF_VERSION}/zarf_${ZARF_VERSION}_Linux_amd64" -o zarf && \
+	chmod +x zarf && \
+	mv zarf /usr/bin/zarf
+
 # Configure podman
 RUN echo jenkins:10000:5000 >/etc/subuid && \
 	echo jenkins:10000:5000 >/etc/subgid
@@ -56,7 +62,6 @@ WORKDIR /home/jenkins
 # Install MS ClearType fonts for user
 RUN mkdir -p ~/.local/share/fonts && \
 	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/a89213b7136da6dd5c3638db1f2c6e814c40fa84.zip | unzip -d ~/.local/share/fonts -j - '*/font/*' && \
-	curl -s -L -o PowerPointViewer.exe https://archive.org/download/PowerPointViewer_201801/PowerPointViewer.exe && cabextract PowerPointViewer.exe -F ppviewer.cab && cabextract ppviewer.cab -F '*.TTC' -d ~/.local/share/fonts/ && cabextract ppviewer.cab -F '*.TTF' -d ~/.local/share/fonts/ && rm -rf *.exe *.cab && \
 	fc-cache -fv ~/.local/share/fonts
 
 # Initialize npm
