@@ -4,7 +4,7 @@ $script:AirpowerPackages =
 	'doxygen',
 	'erlang',
 	'gradle',
-	'jdk',
+	'jdk:17',
 	'jom',
 	'llvm',
 	'nasm',
