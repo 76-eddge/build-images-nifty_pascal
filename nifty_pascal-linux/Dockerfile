@@ -44,6 +44,12 @@ RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc6
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
 
+# Install zarf
+RUN ZARF_VERSION=$(curl -sIX HEAD https://github.com/zarf-dev/zarf/releases/latest | grep -i ^location: | grep -Eo 'v[0-9]+.[0-9]+.[0-9]+') && \
+	curl -sL "https://github.com/zarf-dev/zarf/releases/download/${ZARF_VERSION}/zarf_${ZARF_VERSION}_Linux_amd64" -o zarf && \
+	chmod +x zarf && \
+	mv zarf /usr/bin/zarf
+
 # Configure podman
 RUN echo jenkins:10000:5000 >/etc/subuid && \
 	echo jenkins:10000:5000 >/etc/subgid
