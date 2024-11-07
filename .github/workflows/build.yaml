@@ -40,12 +40,13 @@ jobs:
         docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${GIT_TAG#v}
         docker push -a 76eddge/build-images
 
-    - name: Push Test Docker Image
-      if: github.event_name != 'release' && startsWith(github.ref_name, 'test')
+    - name: Push Docker Image
+      if: github.event_name != 'release' && startsWith(github.ref_name, 'push/')
       run: |
+        branch=${{ github.ref_name }}
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${{ github.ref_name }}
-        docker push "76eddge/build-images:${{ matrix.tag }}-${{ github.ref_name }}"
+        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${branch:5}
+        docker push "76eddge/build-images:${{ matrix.tag }}-${branch:5}"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
@@ -81,12 +82,13 @@ jobs:
         docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-$('${{ github.event.release.tag_name }}' -replace '^v', '')"
         docker push -a 76eddge/build-images
 
-    - name: Push Test Docker Image
-      if: github.event_name != 'release' && startsWith(github.ref_name, 'test')
+    - name: Push Docker Image
+      if: github.event_name != 'release' && startsWith(github.ref_name, 'push/')
       run: |
+        $branch = "${{ github.ref_name }}"
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-${{ github.ref_name }}"
-        docker push "76eddge/build-images:nifty_pascal-windows-${{ github.ref_name }}"
+        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-$($branch.Substring(5))"
+        docker push "76eddge/build-images:nifty_pascal-windows-$($branch.Substring(5))"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
