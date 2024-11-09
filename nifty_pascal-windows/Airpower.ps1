@@ -7,10 +7,12 @@ $script:AirpowerPackages =
 	'jdk:17',
 	'jom',
 	'llvm',
+	'mingw',
 	'nasm',
 	'ninja',
 	'node',
 	'python',
-	"vs-buildtools:17.8",
+	'vs-buildtools:17.8',
+	'vscode',
 	'git',
 	'perl'
