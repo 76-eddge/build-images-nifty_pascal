@@ -19,8 +19,9 @@ RUN apk add --no-cache ca-certificates less ncurses-terminfo-base krb5-libs libg
 # Install erlang
 RUN apk add --no-cache erlang
 
-# Install older MS TrueType fonts
-RUN update-ms-fonts && fc-cache -f
+# Install fonts, including older MS TrueType fonts
+RUN apk add --no-cache font-fira-code-nerd font-fira-mono-nerd font-inconsolata && \
+	update-ms-fonts && fc-cache -f
 
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
