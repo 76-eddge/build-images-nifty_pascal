@@ -15,6 +15,3 @@ RUN $ProgressPreference = 'SilentlyContinue'; \
 	pwr exec -ScriptBlock { gradle -i --no-daemon resolveDependencies --refresh-dependencies }; \
 	if (-not $?) { throw \"gradle failed with exit code $LASTEXITCODE\" }; \
 	rm -r -fo Airpower.ps1, *.gradle
-
-# Create make.exe -> gmake.exe link
-RUN Get-ChildItem -Path \\?\$env:LocalAppData\Airpower\content -Recurse -Include 'gmake.exe' | Select-Object -First 1 | ForEach-Object { if (-not (Test-Path \"$($_.DirectoryName)\make.exe\")) { New-Item -ItemType HardLink \"$($_.DirectoryName)\make.exe\" -Target $_ } }
