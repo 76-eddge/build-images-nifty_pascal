@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
 # Install npm, JDK, gradle from latest-stable for security fixes
