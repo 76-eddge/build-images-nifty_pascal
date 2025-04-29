@@ -4,6 +4,11 @@ FROM alpine AS deploy
 RUN apk add --no-cache autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers lld llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
+# Install git-tools
+RUN curl -sL https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.tar.gz | tar xz && \
+	mv git-tools-*/git-* /usr/bin/ && \
+	rm -rf git-tools-*
+
 # Install npm, JDK, gradle from latest-stable for security fixes
 RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk && \
 	curl -sL $(curl -sL https://gradle.org/releases/ | sed -nre 's/.*"([^"]+-bin\.zip)".*/\1/p' | head -n1) | unzip -d /opt -q - && \
@@ -26,7 +31,7 @@ RUN apk add --no-cache font-fira-code-nerd font-fira-mono-nerd font-inconsolata 
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
 		mkdir -p "/opt/$Arch" && \
-		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.49/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
+		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.50/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
 		echo 'extern void __stack_chk_fail(void); void __attribute__((__weak__, __visibility__("hidden"))) __stack_chk_fail_local(void) { __stack_chk_fail(); }' | "/opt/$Arch/bin/$Arch-gcc" -xc - -O3 -nostdlib -fPIC -c -o libssp_nonshared.o; \
 			"/opt/$Arch/bin/$Arch-gcc-ar" rc "/opt/$Arch/$Arch/lib/libssp_nonshared.a" libssp_nonshared.o; \
 			rm -rf libssp_nonshared.o; \
