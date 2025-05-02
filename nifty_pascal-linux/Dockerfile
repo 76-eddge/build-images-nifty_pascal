@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers lld llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed util-linux-dev valgrind xz && \
+RUN apk add --no-cache autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig gdb g++ git git-lfs helm libtool linux-headers lld llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-setuptools python3 samurai sed sudo util-linux-dev valgrind xz && \
 	ln -sf python3 /usr/bin/python
 
 # Install git-tools
@@ -61,7 +61,11 @@ RUN echo jenkins:10000:5000 >/etc/subuid && \
 	echo jenkins:10000:5000 >/etc/subgid
 
 # Perform tasks as basic user
-RUN adduser --disabled-password jenkins
+RUN adduser --disabled-password jenkins && \
+	mkdir -p /etc/sudoers.d && \
+	echo "jenkins ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/jenkins && \
+	chmod 0440 /etc/sudoers.d/jenkins
+
 USER jenkins
 WORKDIR /home/jenkins
 
