@@ -37,10 +37,11 @@ RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc6
 			rm -rf libssp_nonshared.o; \
 		find "/opt/$Arch" -name '*.o' | xargs -i cp -l '{}' "/opt/$Arch/lib/"; \
 		echo "--target=$Arch --gcc-toolchain=/opt/$Arch --sysroot=/opt/$Arch -fuse-ld=lld -static-libgcc" > "/opt/$Arch/clang.cfg"; \
-		echo | "/opt/$Arch/bin/$Arch-gcc" -xc++ -E -v - 2>&1 | grep "^ .*/$Arch/include" | sed 's/^/-isystem /' >> "/opt/$Arch/clang.cfg"; \
+		echo | "/opt/$Arch/bin/$Arch-gcc" -xc -E -v - 2>&1 | grep "^ .*/$Arch/include" | sed 's/^/-isystem /' >> "/opt/$Arch/clang.cfg"; \
+		echo | "/opt/$Arch/bin/$Arch-gcc" -xc++ -E -v - 2>&1 | grep "^ .*/$Arch/include" | sed 's/^/-isystem /' >> "/opt/$Arch/clang++.cfg"; \
 		find "/opt/$Arch" -name '*.a' -o -name '*.so*' | grep -v plugin | sed -re 's#/[^/]+$##' | uniq | sed 's/^/-L /' >> "/opt/$Arch/clang.cfg"; \
 		printf "#!/bin/sh\nexec clang --config=/opt/$Arch/clang.cfg \"\$@\"" > "/opt/$Arch/bin/$Arch-clang"; \
-		printf "#!/bin/sh\nexec clang++ --config=/opt/$Arch/clang.cfg \"\$@\"" > "/opt/$Arch/bin/$Arch-clang++"; \
+		printf "#!/bin/sh\nexec clang++ --config=/opt/$Arch/clang++.cfg \"\$@\"" > "/opt/$Arch/bin/$Arch-clang++"; \
 		chmod +x "/opt/$Arch/bin/$Arch-clang"*; \
 		ln -s /usr/bin/llvm-ar "/opt/$Arch/bin/$Arch-llvm-ar"; \
 		ln -s /usr/bin/llvm-ld "/opt/$Arch/bin/$Arch-llvm-ld"; \
