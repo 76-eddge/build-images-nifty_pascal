@@ -80,7 +80,7 @@ RUN mkdir -p ~/.local/share/fonts && \
 COPY --chown=jenkins package.json ./npm-init/
 RUN PUPPETEER_SKIP_DOWNLOAD=true cd npm-init && \
 	npm install && \
-	npm i monocart-coverage-reports && \
+	npm install monocart-coverage-reports && \
 	cd .. && \
 	rm -rf npm-init
 
