@@ -18,12 +18,12 @@ jobs:
         - nifty_pascal-linux
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: jlumbroso/free-disk-space@main
-    - uses: docker/setup-buildx-action@v2
+    - uses: actions/checkout@v5
+    - uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+    - uses: docker/setup-buildx-action@v3
 
     - name: Build Docker Image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         cache-from: type=gha,scope=${{ matrix.tag }}
         cache-to: type=gha,ignore-error=true,mode=max,scope=${{ matrix.tag }}
@@ -54,7 +54,7 @@ jobs:
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: ${{ matrix.tag }}.sarif
         category: ${{ matrix.tag }}
@@ -65,7 +65,7 @@ jobs:
 
     if: false
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
 
     - name: Build Docker Image
       run: |
@@ -99,7 +99,7 @@ jobs:
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: nifty_pascal-windows.sarif
         category: nifty_pascal-windows
