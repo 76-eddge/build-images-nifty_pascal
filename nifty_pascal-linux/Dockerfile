@@ -13,7 +13,7 @@ RUN curl -sL https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.
 
 # Install npm, JDK, gradle from latest-stable for security fixes
 RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk && \
-	curl -sL $(curl -sL https://gradle.org/releases/ | sed -nre 's/.*"([^"]+-bin\.zip)".*/\1/p' | head -n1) | busybox unzip -d /opt -q - && \
+	curl -sL $(curl -sL https://gradle.org/releases/ | sed -nre 's/.*"([^"]+-bin\.zip)".*/\1/p' | head -n1) | unzip -d /opt -q - && \
 	chmod +x /opt/gradle-*/bin/gradle && ln -s /opt/gradle-*/bin/gradle /usr/bin/gradle
 
 # Install Powershell and its dependencies, see https://learn.microsoft.com/en-us/powershell/scripting/install/install-alpine
