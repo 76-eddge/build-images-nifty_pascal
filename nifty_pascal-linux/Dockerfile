@@ -76,7 +76,7 @@ WORKDIR /home/${USER}
 
 # Install MS ClearType fonts for user
 RUN mkdir -p ~/.local/share/fonts && \
-	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/a89213b7136da6dd5c3638db1f2c6e814c40fa84.zip | busybox unzip -d ~/.local/share/fonts -j - '*/font/*' && \
+	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/a89213b7136da6dd5c3638db1f2c6e814c40fa84.zip | unzip -d ~/.local/share/fonts -j - '*/font/*' && \
 	curl -s -L -o PowerPointViewer.exe https://archive.org/download/PowerPointViewer_201801/PowerPointViewer.exe && cabextract PowerPointViewer.exe -F ppviewer.cab && cabextract ppviewer.cab -F '*.TTC' -d ~/.local/share/fonts/ && cabextract ppviewer.cab -F '*.TTF' -d ~/.local/share/fonts/ && rm -rf *.exe *.cab && \
 	fc-cache -fv ~/.local/share/fonts
 
