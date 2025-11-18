@@ -1,5 +1,4 @@
-ARG BASE=alpine
-FROM ${BASE} AS deploy
+FROM alpine AS deploy
 
 # Install build dependencies
 RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs helm libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
@@ -66,13 +65,33 @@ RUN echo ${USER}:10000:5000 >/etc/subuid && \
 	sed -i 's/#mount_program/mount_program/' /etc/containers/storage.conf
 
 # Perform tasks as basic user
-RUN adduser --disabled-password ${USER} | : && \
+RUN adduser --disabled-password ${USER} && \
 	mkdir -p /etc/sudoers.d && \
 	echo "${USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USER} && \
 	chmod 0440 /etc/sudoers.d/${USER}
 
+RUN if [ ${USER} == 'vscode' ]; then \
+		# Install dev containers common utils
+		git clone https://github.com/devcontainers/features.git && \
+		export CONFIGURE_ZSH_AS_DEFAULT_SHELL="true" && \
+		export PACKAGES_ALREADY_INSTALLED="true" && \
+		export UPGRADE_PACKAGES="false" && \
+		export USERNAME=${USER} && \
+		./features/src/common-utils/install.sh && \
+		rm -rf features; \
+	fi
+
 USER ${USER}
 WORKDIR /home/${USER}
+
+RUN if [ ${USER} == 'vscode' ]; then \
+		# Configure gnupg
+		mkdir -p ~/.gnupg && \
+		echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf && \
+		echo "allow-loopback-pinentry\npinentry-program /usr/bin/pinentry-curses\n" >> ~/.gnupg/gpg-agent.conf && \
+		# Configure history
+		echo "export PROMPT_COMMAND='history -a'\nexport HISTFILE=~/.history\n" >> ~/.zshrc; \
+	fi
 
 # Install MS ClearType fonts for user
 RUN mkdir -p ~/.local/share/fonts && \
