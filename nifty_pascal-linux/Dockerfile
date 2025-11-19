@@ -70,28 +70,25 @@ RUN adduser --disabled-password ${USER} && \
 	echo "${USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USER} && \
 	chmod 0440 /etc/sudoers.d/${USER}
 
-RUN if [ ${USER} == 'vscode' ]; then \
+RUN if [ "${USER}" == 'vscode' ]; then \
 		# Install dev containers common utils
 		git clone https://github.com/devcontainers/features.git && \
-		export CONFIGURE_ZSH_AS_DEFAULT_SHELL="true" && \
 		export PACKAGES_ALREADY_INSTALLED="true" && \
 		export UPGRADE_PACKAGES="false" && \
 		export USERNAME=${USER} && \
 		./features/src/common-utils/install.sh && \
-		rm -rf features; \
+		rm -rf features && \
+		# Configure gnupg
+		mkdir -p /etc/gnupg && \
+		echo "allow-loopback-pinentry" >> /etc/gnupg/gpg-agent.conf && \
+		echo "pinentry-program /usr/bin/pinentry-curses" >> /etc/gnupg/gpg-agent.conf && \
+		# Configure zsh as the default shell
+		sed -i 's@/bin/sh@/bin/zsh@g' /etc/passwd && \
+		cat /etc/passwd; \
 	fi
 
 USER ${USER}
 WORKDIR /home/${USER}
-
-RUN if [ ${USER} == 'vscode' ]; then \
-		# Configure gnupg
-		mkdir -p ~/.gnupg && \
-		echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf && \
-		echo "allow-loopback-pinentry\npinentry-program /usr/bin/pinentry-curses\n" >> ~/.gnupg/gpg-agent.conf && \
-		# Configure history
-		echo "export PROMPT_COMMAND='history -a'\nexport HISTFILE=~/.history\n" >> ~/.zshrc; \
-	fi
 
 # Install MS ClearType fonts for user
 RUN mkdir -p ~/.local/share/fonts && \
