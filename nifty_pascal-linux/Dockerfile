@@ -80,8 +80,7 @@ RUN if [ "${USER}" == 'vscode' ]; then \
 		rm -rf features && \
 		# Configure gnupg
 		mkdir -p /etc/gnupg && \
-		echo "allow-loopback-pinentry" >> /etc/gnupg/gpg-agent.conf && \
-		echo "pinentry-program /usr/bin/pinentry-curses" >> /etc/gnupg/gpg-agent.conf && \
+		echo "pinentry-mode loopback" >> /etc/gnupg/gpg.conf && \
 		# Configure zsh as the default shell
 		sed -i 's@/bin/sh@/bin/zsh@g' /etc/passwd && \
 		cat /etc/passwd; \
