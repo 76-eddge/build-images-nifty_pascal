@@ -113,7 +113,10 @@ RUN cd gradle-init && \
 	cd .. && \
 	rm -rf gradle-init
 
-# Initialize PowerShell
+# Initialize PowerShell (see https://github.com/PowerShell/PowerShell/issues/18958, issue still exists despite being closed)
+RUN mkdir -p .cache/powershell && \
+	rm -rf .cache/powershell/* && \
+	chmod a-w .cache/powershell
 SHELL ["/usr/bin/pwsh", "-Command"]
 RUN New-Item -ItemType File -Path $Profile -Force; \
 	Add-Content $Profile '$env:PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium-browser"'
