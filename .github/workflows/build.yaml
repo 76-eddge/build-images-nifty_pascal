@@ -33,29 +33,48 @@ jobs:
         cache-from: type=gha,scope=${{ matrix.tag }}
         cache-to: type=gha,ignore-error=true,mode=max,scope=${{ matrix.tag }}
         context: nifty_pascal-linux
-        outputs: type=docker
-        tags: 76eddge/build-images:${{ matrix.tag }}
+        load: true
+        tags: ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:${{ matrix.tag }}
         target: deploy
 
-    - name: Push Release Docker Image
-      if: github.event_name == 'release'
+    - name: Login to Docker Hub
+      if: github.event_name == 'release' || startsWith(github.ref_name, 'push/')
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Setup Docker Push Vars
+      id: vars
+      if: github.event_name == 'release' || startsWith(github.ref_name, 'push/')
       run: |
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-        GIT_TAG=${{ github.event.release.tag_name }}
-        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${GIT_TAG#v}
-        docker push -a 76eddge/build-images
+        if [ '${{ github.event_name }}' == 'release' ]; then
+          git_tag=${{ github.event.release.tag_name }}
+          export id=${git_tag#v}
+        else
+          branch=${{ github.ref_name }}
+          export id=${branch:5}
+        fi
+        echo "::set-output name=id::$id"
 
     - name: Push Docker Image
-      if: github.event_name != 'release' && startsWith(github.ref_name, 'push/')
-      run: |
-        branch=${{ github.ref_name }}
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-        docker tag 76eddge/build-images:${{ matrix.tag }} 76eddge/build-images:${{ matrix.tag }}-${branch:5}
-        docker push "76eddge/build-images:${{ matrix.tag }}-${branch:5}"
+      if: github.event_name == 'release' || startsWith(github.ref_name, 'push/')
+      uses: docker/build-push-action@v6
+      with:
+        build-args: |
+          USER=${{ matrix.user }}
+        cache-from: type=gha,scope=${{ matrix.tag }}
+        cache-to: type=gha,ignore-error=true,mode=max,scope=${{ matrix.tag }}
+        context: nifty_pascal-linux
+        push: true
+        provenance: mode=max
+        sbom: true
+        tags: ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:${{ matrix.tag }}-${{ steps.vars.outputs.id }}
+        target: deploy
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
-      run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock anchore/grype -o sarif docker:76eddge/build-images:${{ matrix.tag }} > ${{ matrix.tag }}.sarif
+      run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock anchore/grype -o sarif docker:${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:${{ matrix.tag }} > ${{ matrix.tag }}.sarif
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
@@ -78,28 +97,28 @@ jobs:
         dockerd --register-service --storage-opt "size=60G"
         net start docker
         cp nifty_pascal-linux/build.gradle nifty_pascal-windows/
-        docker build nifty_pascal-windows --tag 76eddge/build-images:nifty_pascal-windows
+        docker build nifty_pascal-windows --tag ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows
 
     - name: Push Release Docker Image
       if: github.event_name == 'release'
       run: |
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-$('${{ github.event.release.tag_name }}' -replace '^v', '')"
-        docker push -a 76eddge/build-images
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username ${{ vars.DOCKERHUB_USERNAME || '76eddge' }} --password-stdin
+        docker tag ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows "${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows-$('${{ github.event.release.tag_name }}' -replace '^v', '')"
+        docker push -a ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images
 
     - name: Push Docker Image
       if: github.event_name != 'release' && startsWith(github.ref_name, 'push/')
       run: |
         $branch = "${{ github.ref_name }}"
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username 76eddge --password-stdin
-        docker tag 76eddge/build-images:nifty_pascal-windows "76eddge/build-images:nifty_pascal-windows-$($branch.Substring(5))"
-        docker push "76eddge/build-images:nifty_pascal-windows-$($branch.Substring(5))"
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username ${{ vars.DOCKERHUB_USERNAME || '76eddge' }} --password-stdin
+        docker tag ${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows "${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows-$($branch.Substring(5))"
+        docker push "${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows-$($branch.Substring(5))"
 
     - name: Run Grype Scan
       if: github.event_name != 'release'
       run: |
         choco install grype
-        grype --platform 'windows/amd64' -o sarif '76eddge/build-images:nifty_pascal-windows' | Out-File nifty_pascal-windows.sarif utf8
+        grype --platform 'windows/amd64' -o sarif '${{ vars.DOCKERHUB_USERNAME || '76eddge' }}/build-images:nifty_pascal-windows' | Out-File nifty_pascal-windows.sarif utf8
 
     - name: Upload Grype Scan Results
       if: github.event_name != 'release'
