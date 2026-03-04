@@ -1,7 +1,7 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl docs doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs helm libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-pip py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl docs doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-pip py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
 	apk del --no-cache zip unzip
 
 # Install git-tools
@@ -50,6 +50,12 @@ RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc6
 		ln -s /usr/bin/llvm-ranlib "/opt/$Arch/bin/$Arch-llvm-ranlib"; \
 	done; \
 	find /opt/*/*/include/c++ -name c++config.h | xargs sed -i -re 's/^(\s*#\s*define\s+_GLIBCXX_HAVE_ATTRIBUTE_VISIBILITY).*/\1 0/'
+
+# Install helm
+RUN mkdir -p /opt/helm && \
+	curl -sL $(curl -sL https://api.github.com/repos/helm/helm/releases/latest | perl -ne '/(https:\/\/[A-Za-z0-9-._~:\/?#@!&%*+,;=]+-linux-(amd64|x64|x86_64)\.tar\.gz)\.?[^A-Za-z0-9-._~:\/?#@!&%*+,;=]/ && print "$1"') | tar zx -C /opt/helm && \
+	find /opt/helm -name helm -type f -exec mv -f {} /usr/bin/ \; && \
+	rm -rf /opt/helm
 
 # Install zarf
 RUN ZARF_VERSION=$(curl -sIX HEAD https://github.com/zarf-dev/zarf/releases/latest | grep -i ^location: | grep -Eo 'v[0-9]+.[0-9]+.[0-9]+') && \
