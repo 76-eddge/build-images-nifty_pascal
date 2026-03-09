@@ -10,7 +10,8 @@ RUN curl -sL https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.
 	rm -rf git-tools-*
 
 # Install npm, JDK, gradle from latest-stable for security fixes
-RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk && \
+RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk openjdk25-jdk && \
+	ln -sfn java-17-openjdk /usr/lib/jvm/default-jvm && \
 	curl -sL $(curl -sL https://gradle.org/releases/ | sed -nre 's/.*"([^"]+-bin\.zip)".*/\1/p' | head -n1) | unzip -d /opt -q - && \
 	chmod +x /opt/gradle-*/bin/gradle && ln -s /opt/gradle-*/bin/gradle /usr/bin/gradle
 
