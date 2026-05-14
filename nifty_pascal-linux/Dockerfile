@@ -32,7 +32,7 @@ RUN apk add --no-cache font-fira-code-nerd font-fira-mono-nerd font-inconsolata 
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
 		mkdir -p "/opt/$Arch" && \
-		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.51/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
+		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.52/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
 		echo 'extern void __stack_chk_fail(void); void __attribute__((__weak__, __visibility__("hidden"))) __stack_chk_fail_local(void) { __stack_chk_fail(); }' | "/opt/$Arch/bin/$Arch-gcc" -xc - -O3 -nostdlib -fPIC -c -o libssp_nonshared.o; \
 			"/opt/$Arch/bin/$Arch-gcc-ar" rc "/opt/$Arch/$Arch/lib/libssp_nonshared.a" libssp_nonshared.o; \
 			rm -rf libssp_nonshared.o; \
@@ -97,7 +97,7 @@ WORKDIR /home/${USER}
 
 # Install MS ClearType fonts for user
 RUN mkdir -p ~/.local/share/fonts && \
-	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/a89213b7136da6dd5c3638db1f2c6e814c40fa84.zip | unzip -d ~/.local/share/fonts -j - '*/font/*' && \
+	curl -s -L https://github.com/mrbvrz/segoe-ui-linux/archive/a89213b7136da6dd5c3638db1f2c6e814c40fa84.zip | busybox unzip -d ~/.local/share/fonts -j - '*/font/*' && \
 	curl -s -L -o PowerPointViewer.exe https://archive.org/download/PowerPointViewer_201801/PowerPointViewer.exe && cabextract PowerPointViewer.exe -F ppviewer.cab && cabextract ppviewer.cab -F '*.TTC' -d ~/.local/share/fonts/ && cabextract ppviewer.cab -F '*.TTF' -d ~/.local/share/fonts/ && rm -rf *.exe *.cab && \
 	fc-cache -fv ~/.local/share/fonts
 
