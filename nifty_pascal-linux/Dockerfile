@@ -1,8 +1,13 @@
 FROM alpine AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl docs doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-pip py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl docs doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman protobuf protobuf-dev py3-colorlog py3-jinja2 py3-lxml py3-pip py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
 	apk del --no-cache zip unzip
+
+# Install buf
+RUN curl -sSL https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -o /usr/local/bin/buf && \
+	chmod +x /usr/local/bin/buf && \
+	buf --version
 
 # Install git-tools
 RUN curl -sL https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.tar.gz | tar xz && \
