@@ -9,11 +9,6 @@ RUN curl -sSL https://github.com/bufbuild/buf/releases/latest/download/buf-Linux
 	chmod +x /usr/local/bin/buf && \
 	buf --version
 
-# Install git-tools
-RUN curl -sL https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.tar.gz | tar xz && \
-	mv git-tools-*/git-* /usr/bin/ && \
-	rm -rf git-tools-*
-
 # Install npm, JDK, gradle from latest-stable for security fixes
 RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk openjdk25-jdk && \
 	ln -sfn java-17-openjdk /usr/lib/jvm/default-jvm && \
