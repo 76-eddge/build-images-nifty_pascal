@@ -11,13 +11,10 @@
 		"remark-gfm": ">=4",
 		"remark-rehype": ">=11",
 
-		"arg": ">=5",
 		"colors": ">=1",
 		"dictionary-en": ">=3",
 		"diff": ">=5",
 		"github-slugger": ">=2",
-		"remark": ">=15",
-		"remark-gfm": ">=4",
 		"remark-lint": ">=9",
 		"remark-lint-list-item-indent": ">=3",
 		"remark-lint-maximum-line-length": ">=3",
@@ -35,7 +32,8 @@
 		"unified": ">=11"
 	},
 	"overrides": {
-		"d3-color": "3.1.0"
+		"d3-color": "3.1.0",
+		"lodash-es": "4.18.1"
 	},
 	"type": "module"
 }
