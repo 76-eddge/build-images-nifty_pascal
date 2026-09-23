@@ -1,11 +1,22 @@
-FROM alpine AS deploy
+ARG BASE_IMAGE=alpine
+FROM ${BASE_IMAGE} AS deploy
 
 # Install build dependencies
-RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl docs doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman protobuf protobuf-dev py3-colorlog py3-jinja2 py3-lxml py3-pip py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
+RUN apk add --no-cache afl++ autoconf automake chromium clang clang-analyzer clang-extra-tools cmake curl docs doxygen file fontconfig fuse-overlayfs gdb g++ git git-lfs libtool linux-headers lld lldb llvm make msttcorefonts-installer nodejs openssl patch perl podman py3-colorlog py3-jinja2 py3-lxml py3-pip py3-pygments py3-setuptools python3 samurai sed sudo util-linux-dev valgrind websocat xz && \
 	apk del --no-cache zip unzip
 
 # Fix libtool 2.6.0
 RUN sed -i -e 's/(OBJCFLAGS)])])/(OBJCFLAGS)/' -e 's/(OBJCXXFLAGS)])])/(OBJCXXFLAGS)/' /usr/share/aclocal/libtool.m4
+
+# Install protoc
+RUN mkdir -p protoc && \
+	PROTOC_VERSION=$(curl -sSL "https://api.github.com/repos/protocolbuffers/protobuf/releases/latest" | grep -oE 'protoc-[0-9]+[.][0-9]+' | head -n1) && \
+	curl -sSL "https://github.com/protocolbuffers/protobuf/releases/latest/download/${PROTOC_VERSION}-linux-x86_64.zip" -o protoc/protoc-linux-x86_64.zip && \
+	unzip -d protoc -q protoc/protoc-linux-x86_64.zip && \
+	mv protoc/bin/protoc /usr/local/bin/protoc && \
+	mv protoc/include/ /usr/local/include/ && \
+	rm -rf protoc && \
+	protoc --version
 
 # Install buf
 RUN curl -sSL https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -o /usr/local/bin/buf && \
@@ -119,6 +130,9 @@ RUN git config --global --add safe.directory "*"
 COPY --chown=${USER} build.gradle ./gradle-init/
 RUN cd gradle-init && \
 	gradle -i --no-daemon resolveDependencies --refresh-dependencies && \
+	# Check that the protoc and protobuf-java dependencies are compatible; e.g. if protoc v36.2 is installed, then protobuf-java needs to resolve to 4.36.2
+	DEP_VERSION=$(gradle dependencyInsight --dependency 'com.google.protobuf:protobuf-java' -q | grep -oE 'com[.]google[.]protobuf:protobuf-java:4[.][+] -> 4[.][0-9]+[.][0-9]+' | head -n1 | awk -F ' -> 4[.]' '{print $NF}') && \
+	"$DEP_VERSION" != "$(protoc --version | grep -oE '[0-9]+[.][0-9]+')" && echo "Incompatible versions of protoc and protobuf-java $DEP_VERSION" && exit 1 || \
 	cd .. && \
 	rm -rf gradle-init
 
