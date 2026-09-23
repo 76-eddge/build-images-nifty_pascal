@@ -30,6 +30,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         build-args: |
+          BASE_IMAGE=alpine
           USER=${{ matrix.user }}
         cache-from: type=gha,scope=${{ matrix.tag }}
         cache-to: type=gha,ignore-error=true,mode=max,scope=${{ matrix.tag }}
