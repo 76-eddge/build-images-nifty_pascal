@@ -109,6 +109,7 @@ COPY --chown=${USER} package.json ./npm-init/
 RUN PUPPETEER_SKIP_DOWNLOAD=true cd npm-init && \
 	npm install && \
 	npm install monocart-coverage-reports && \
+	npm audit && \
 	cd .. && \
 	rm -rf npm-init
 
