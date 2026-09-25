@@ -1,4 +1,5 @@
 plugins {
+	id 'com.gradleup.shadow' version '9.6.1'
 	id 'org.gradle.crypto.checksum' version '1.4.0'
 	id 'org.ysb33r.doxygen' version '2.0.0'
 	id 'java'
@@ -12,7 +13,9 @@ repositories {
 
 dependencies {
 	implementation 'org.ow2.asm:asm:9.+'
+	implementation 'build.buf:protovalidate:1.+'
 	implementation 'com.github.horseshoe:horseshoe:2.+'
+	implementation 'com.google.protobuf:protobuf-java:4.+'
 	implementation 'io.github.xs-parser:xs-parser:3.+'
 	implementation 'org.commonmark:commonmark:0.+'
 	implementation 'org.commonmark:commonmark-ext-autolink:0.+'
