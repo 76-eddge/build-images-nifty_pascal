@@ -31,5 +31,8 @@
 		"retext-syntax-urls": ">=4",
 		"unified": ">=11"
 	},
+	"overrides": {
+		"katex": ">=0.18.2"
+	},
 	"type": "module"
 }
