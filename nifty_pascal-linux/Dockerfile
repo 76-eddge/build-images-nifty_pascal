@@ -13,7 +13,7 @@ RUN mkdir -p protoc && \
 	PROTOC_VERSION=$(curl -sSL "https://api.github.com/repos/protocolbuffers/protobuf/releases/latest" | grep -oE 'protoc-[0-9]+[.][0-9]+' | head -n1) && \
 	curl -sSL "https://github.com/protocolbuffers/protobuf/releases/latest/download/${PROTOC_VERSION}-linux-x86_64.zip" -o protoc/protoc-linux-x86_64.zip && \
 	unzip -d protoc -q protoc/protoc-linux-x86_64.zip && \
-	mv protoc/bin/protoc /usr/local/bin/protoc && \
+	mv protoc/bin/* /usr/local/bin/ && \
 	mv protoc/include/* /usr/local/include/ && \
 	rm -rf protoc && \
 	protoc --version
@@ -46,7 +46,7 @@ RUN apk add --no-cache font-fira-code-nerd font-fira-mono-nerd font-inconsolata 
 # Install cross compilers
 RUN for Arch in aarch64-linux-musl arm-linux-musleabihf i686-linux-musl powerpc64le-linux-musl powerpc-linux-musl x86_64-linux-musl x86_64-linux-muslx32; do \
 		mkdir -p "/opt/$Arch" && \
-		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v0.9.52/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
+		curl -sL "https://github.com/76-eddge/musl-cross/releases/download/v16.2.0/$Arch.tar.xz" | tar xJ -C "/opt/$Arch"; \
 		echo 'extern void __stack_chk_fail(void); void __attribute__((__weak__, __visibility__("hidden"))) __stack_chk_fail_local(void) { __stack_chk_fail(); }' | "/opt/$Arch/bin/$Arch-gcc" -xc - -O3 -nostdlib -fPIC -c -o libssp_nonshared.o; \
 			"/opt/$Arch/bin/$Arch-gcc-ar" rc "/opt/$Arch/$Arch/lib/libssp_nonshared.a" libssp_nonshared.o; \
 			rm -rf libssp_nonshared.o; \
