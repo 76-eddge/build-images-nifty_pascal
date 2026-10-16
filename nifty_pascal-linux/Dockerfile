@@ -14,8 +14,9 @@ RUN mkdir -p protoc && \
 	curl -sSL "https://github.com/protocolbuffers/protobuf/releases/latest/download/${PROTOC_VERSION}-linux-x86_64.zip" -o protoc/protoc-linux-x86_64.zip && \
 	unzip -d protoc -q protoc/protoc-linux-x86_64.zip && \
 	mv protoc/bin/* /usr/local/bin/ && \
-	mv protoc/include/* /usr/local/include/ && \
+	cp -r protoc/include/ /usr/local/include/ && \
 	rm -rf protoc && \
+	ls /usr/local/include/google/protobuf/ && \
 	protoc --version
 
 # Install npm, JDK, gradle from latest-stable for security fixes
