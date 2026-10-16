@@ -11,8 +11,6 @@ task resolveDependencies {
 		configurations.all {
 			if (it.canBeResolved) {
 				it.resolve()
-			} else {
-				System.err.println("Bad: $it")
 			}
 		}
 	}
