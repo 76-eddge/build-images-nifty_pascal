@@ -18,11 +18,6 @@ RUN mkdir -p protoc && \
 	rm -rf protoc && \
 	protoc --version
 
-# Install buf
-RUN curl -sSL https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -o /usr/local/bin/buf && \
-	chmod +x /usr/local/bin/buf && \
-	buf --version
-
 # Install npm, JDK, gradle from latest-stable for security fixes
 RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/latest-stable/community npm openjdk17-jdk openjdk25-jdk && \
 	ln -sfn java-17-openjdk /usr/lib/jvm/default-jvm && \
