@@ -24,6 +24,14 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+configurations.configureEach {
+	resolutionStrategy.componentSelection.all {
+		if (candidate.version ==~ /(?i).+-rc.*/) {
+			reject('Release candidate version')
+		}
+	}
+}
+
 task resolveDependencies {
 	doLast {
 		configurations.all {

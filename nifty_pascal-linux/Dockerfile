@@ -131,7 +131,7 @@ RUN git config --global --add safe.directory "*"
 # Initialize gradle
 COPY --chown=${USER} build*.gradle ./gradle-init/
 RUN cd gradle-init && \
-	gradle -i --no-daemon resolveDependencies --refresh-dependencies && \
+	gradle -i --no-daemon resolveDependencies --refresh-dependencies dependencyInsight --dependency protobuf-java && \
 	# Check that the protoc and protobuf-java dependencies are compatible; e.g. if protoc v36.2 is installed, then protobuf-java needs to resolve to 4.36.2 or later
 	DEP_VERSION=$(gradle dependencyInsight --dependency 'com.google.protobuf:protobuf-java' -q | grep -oE 'com[.]google[.]protobuf:protobuf-java:4[.][+] -> 4[.][0-9]+[.][0-9]+' | head -n1 | awk -F ' -> 4[.]' '{print $NF}') && \
 	awk "BEGIN {exit !($(protoc --version | grep -oE '[0-9]+[.][0-9]+') > $DEP_VERSION)}" && echo "Incompatible versions of protoc and protobuf-java $DEP_VERSION" && exit 1 || \
