@@ -22,6 +22,7 @@ dependencies {
 	implementation 'org.commonmark:commonmark-ext-gfm-tables:0.+'
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.+'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'io.github.xs-parser:xs-parser:4.+'
 }
 
 configurations.configureEach {
