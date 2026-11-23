@@ -29,7 +29,9 @@
 		"retext-sentence-spacing": ">=6",
 		"retext-spell": ">=6",
 		"retext-syntax-urls": ">=4",
-		"unified": ">=11"
+		"unified": ">=11",
+
+		"@cyclonedx/sign": ">=0"
 	},
 	"type": "module"
 }
